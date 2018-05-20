@@ -15,6 +15,7 @@ import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -236,7 +237,7 @@ class JavaProjectObjectModelFactoryImplTest {
         // Test
         List<Path> result = sut.getMavenProject(projectPath, excludePaths);
         // Verify
-        assertEquals(EXPECTED_SIZE, result.size());
+        assertThat(result.size()).isEqualTo(EXPECTED_SIZE);
     }
 
     @Test
@@ -249,7 +250,7 @@ class JavaProjectObjectModelFactoryImplTest {
         // Test
         List<Path> result = sut.getMavenProject(projectPath, excludePaths);
         // Verify
-        assertEquals(EXPECTED_SIZE, result.size());
+        assertThat(result.size()).isEqualTo(EXPECTED_SIZE);
     }
 
     @Test
@@ -262,7 +263,7 @@ class JavaProjectObjectModelFactoryImplTest {
         // Test
         List<Path> result = sut.getMavenProject(projectPath, excludePaths);
         // Verify
-        assertEquals(EXPECTED_SIZE, result.size());
+        assertThat(result.size()).isEqualTo(EXPECTED_SIZE);
     }
 
     void createSubProjects(boolean createTargetDirectory) throws IOException {
