@@ -1,0 +1,17 @@
+target/
+
+#OS junk files
+[Tt]humbs.db
+*.DS_Store
+
+#Maven
+.mvn/
+mvnw
+mvnw.cmd
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+

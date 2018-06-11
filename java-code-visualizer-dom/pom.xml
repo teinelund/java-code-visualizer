@@ -13,7 +13,13 @@
     <version>1.0-SNAPSHOT</version>
     <name>java-code-visualizer-dom</name>
     <url>http://maven.apache.org</url>
-
+    <dependencies>
+        <dependency>
+            <groupId>com.github.javaparser</groupId>
+            <artifactId>javaparser-core</artifactId>
+            <version>3.6.6</version>
+        </dependency>
+    </dependencies>
     <build>
         <plugins>
             <plugin>
@@ -33,8 +39,6 @@
                         <artifactId>junit-platform-surefire-provider</artifactId>
                         <version>${junit.platform.version}</version>
                     </dependency>
-
-
                 </dependencies>
             </plugin>
         </plugins>
