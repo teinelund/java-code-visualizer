@@ -267,5 +267,5 @@ public class JavaProjectObjectModelFactoryImpl implements JavaProjectObjectModel
     // -------------------------------------------------------------------------------------------------------------
     //
 
-    
+
 }
