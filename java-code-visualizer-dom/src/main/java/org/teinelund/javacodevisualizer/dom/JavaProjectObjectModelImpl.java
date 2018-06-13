@@ -1,6 +1,5 @@
 package org.teinelund.javacodevisualizer.dom;
 
-import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -8,7 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-public class MavenProjectImpl implements MavenProject {
+class JavaProjectObjectModelImpl implements JavaProjectObjectModel {
 
     /**
      * Name is not guarenteed to be unique. It is legal to have types with same name but different package name.
@@ -20,11 +19,13 @@ public class MavenProjectImpl implements MavenProject {
      */
     Map<String, List<JavaTypeDeclarationPath>> packageNameToTypeListMap;
 
-    Path mavenProjectPath;
-
-    public MavenProjectImpl(Path mavenProjectPath, List<JavaTypeDeclarationPath> javaTypeDeclarationPaths) {
+    public JavaProjectObjectModelImpl() {
         typeNameMap = new HashMap<>();
         packageNameToTypeListMap = new HashMap<>();
+    }
+
+    @Override
+    public void addJavaTypeDeclarationPaths(List<JavaTypeDeclarationPath> javaTypeDeclarationPaths) {
         for (JavaTypeDeclarationPath jtdp : javaTypeDeclarationPaths) {
             if (typeNameMap.containsKey(jtdp.getName())) {
                 List<JavaTypeDeclarationPath> list = typeNameMap.get(jtdp.getName());
@@ -46,12 +47,15 @@ public class MavenProjectImpl implements MavenProject {
                 packageNameToTypeListMap.put(jtdp.getPackageName(), list);
             }
         }
-        this.mavenProjectPath = mavenProjectPath;
     }
 
     @Override
     public List<JavaTypeDeclarationPath> getAllTypesGivenName(String name) {
-        return Collections.unmodifiableList(this.typeNameMap.get(name));
+        List<JavaTypeDeclarationPath> list = this.typeNameMap.get(name);
+        if (list != null) {
+            return Collections.unmodifiableList(list);
+        }
+        return new LinkedList<JavaTypeDeclarationPath>();
     }
 
     @Override
@@ -67,19 +71,5 @@ public class MavenProjectImpl implements MavenProject {
     @Override
     public Collection<String> getAllPackageNames() {
         return Collections.unmodifiableCollection(this.packageNameToTypeListMap.keySet());
-    }
-
-    @Override
-    public Path getMavenProjectPath() {
-        return this.mavenProjectPath;
-    }
-
-    @Override
-    public List<JavaTypeDeclarationPath> getAllTypes() {
-        List<JavaTypeDeclarationPath> mainList = new LinkedList<>();
-        for (List<JavaTypeDeclarationPath> list : typeNameMap.values()) {
-            mainList.addAll(list);
-        }
-        return mainList;
     }
 }

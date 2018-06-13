@@ -10,4 +10,5 @@ public interface MavenProject {
     public Collection<String> getAllTypeNames();
     public Collection<String> getAllPackageNames();
     public Path getMavenProjectPath();
+    public List<JavaTypeDeclarationPath> getAllTypes();
 }

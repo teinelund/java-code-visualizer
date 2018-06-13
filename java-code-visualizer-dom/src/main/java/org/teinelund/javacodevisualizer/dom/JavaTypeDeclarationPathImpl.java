@@ -1,6 +1,11 @@
 package org.teinelund.javacodevisualizer.dom;
 
+import com.github.javaparser.ast.body.TypeDeclaration;
+
 import java.nio.file.Path;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
 class JavaTypeDeclarationPathImpl implements JavaTypeDeclarationPath {
 
@@ -9,6 +14,8 @@ class JavaTypeDeclarationPathImpl implements JavaTypeDeclarationPath {
     private Path pathToTypeDeclaration;
     private JavaType javaType;
     private AccessModifier accessModifier;
+    private TypeDeclaration<?> typeDeclaration;
+    private List<Field> fields;
 
     private JavaTypeDeclarationPathImpl( JavaTypeDeclarationPathBuilder javaTypeDeclarationPathBuilder) {
         this.name = javaTypeDeclarationPathBuilder.name;
@@ -16,6 +23,8 @@ class JavaTypeDeclarationPathImpl implements JavaTypeDeclarationPath {
         this.pathToTypeDeclaration = javaTypeDeclarationPathBuilder.pathToTypeDeclaration;
         this.javaType = javaTypeDeclarationPathBuilder.javaType;
         this.accessModifier = javaTypeDeclarationPathBuilder.accessModifier;
+        this.typeDeclaration = javaTypeDeclarationPathBuilder.typeDeclaration;
+        this.fields = new LinkedList<>();
     }
 
     @Override
@@ -43,6 +52,21 @@ class JavaTypeDeclarationPathImpl implements JavaTypeDeclarationPath {
         return this.accessModifier;
     }
 
+    @Override
+    public TypeDeclaration<?> getTypeDeclaration() {
+        return this.typeDeclaration;
+    }
+
+    @Override
+    public void addField(String fieldName, JavaTypeDeclarationPath fieldClass) {
+        this.fields.add(FieldImpl.builder().setName(fieldName).setType(fieldClass).build());
+    }
+
+    @Override
+    public List<Field> getFields() {
+        return Collections.unmodifiableList(this.fields);
+    }
+
     public static JavaTypeDeclarationPathBuilder builder() {
         return new JavaTypeDeclarationPathBuilder();
     }
@@ -53,6 +77,7 @@ class JavaTypeDeclarationPathImpl implements JavaTypeDeclarationPath {
         private Path pathToTypeDeclaration;
         private JavaType javaType;
         private AccessModifier accessModifier;
+        private TypeDeclaration<?> typeDeclaration;
 
 
         public JavaTypeDeclarationPathBuilder setName(String name) {
@@ -79,6 +104,13 @@ class JavaTypeDeclarationPathImpl implements JavaTypeDeclarationPath {
             this.accessModifier = accessModifier;
             return this;
         }
+
+        public JavaTypeDeclarationPathBuilder setTypeDeclaration(TypeDeclaration<?> typeDeclaration) {
+            this.typeDeclaration = typeDeclaration;
+            return this;
+        }
+
+
 
         public JavaTypeDeclarationPath build() {
             return new JavaTypeDeclarationPathImpl( this );

@@ -330,6 +330,8 @@ class JavaProjectObjectModelFactoryImplTest {
     private final String CLASS_NAME = "Customer";
     private final String INNER_CLASS_NAME = "CustomerCreditCard";
     private final String PACKAGE_NAME = "org.teinelund";
+    private final String CLASS_NAME_CUSTOMER = "Customer";
+    private final String CLASS_NAME_ORDER = "Order";
 
 
     @Test
@@ -578,5 +580,43 @@ class JavaProjectObjectModelFactoryImplTest {
             return list;
         }
     }
+
+    //
+    // wire Classes
+    //
+
+    @Test
+    public void wireClassFieldsWhereClassExist() {
+        // Initialize
+        JavaProjectObjectModelFactoryImpl sut = new JavaProjectObjectModelFactoryImpl();
+        JavaProjectObjectModel jdom = createJavaProjectObjectModel(sut);
+        // Test
+        sut.wireClassFields(jdom);
+        // Verify
+        assertThat(jdom.getAllTypesGivenName(CLASS_NAME_ORDER).get(0).getFields().get(0).getType().getName()).isEqualTo(CLASS_NAME_CUSTOMER);
+    }
+
+    JavaProjectObjectModel createJavaProjectObjectModel(JavaProjectObjectModelFactoryImpl sut) {
+        JavaProjectObjectModel jpom = new JavaProjectObjectModelImpl();
+        List<JavaTypeDeclarationPath> jtdps = sut.parseJavaFile(createJavaSourceFileContainingClassWithField(CLASS_NAME_CUSTOMER, "String", "name"), javaSourceFile);
+        jpom.addJavaTypeDeclarationPaths(jtdps);
+        jtdps = sut.parseJavaFile(createJavaSourceFileContainingClassWithField(CLASS_NAME_ORDER, CLASS_NAME_CUSTOMER, "customer"), javaSourceFile);
+        jpom.addJavaTypeDeclarationPaths(jtdps);
+        return jpom;
+    }
+
+    Reader createJavaSourceFileContainingClassWithField(String className, String fieldType, String fieldName) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("package " + PACKAGE_NAME + ";"); sb.append(java.lang.System.lineSeparator());
+        sb.append(""); sb.append(java.lang.System.lineSeparator());
+        sb.append("import java.io.IOException;"); sb.append(java.lang.System.lineSeparator());
+        sb.append(""); sb.append(java.lang.System.lineSeparator());
+        sb.append("public class " + className + " {"); sb.append(java.lang.System.lineSeparator());
+        sb.append("   private " + fieldType + " " + fieldName + ";"); sb.append(java.lang.System.lineSeparator());
+        sb.append(""); sb.append(java.lang.System.lineSeparator());
+        sb.append("}"); sb.append(java.lang.System.lineSeparator());
+        return new StringReader(sb.toString());
+    }
+
 
 }
