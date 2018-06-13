@@ -1,4 +1,6 @@
-package org.teinelund.javacodevisualizer.dom;
+package org.teinelund.javacodevisualizer.factory;
+
+import org.teinelund.javacodevisualizer.dom.JavaProjectObjectModel;
 
 import java.io.IOException;
 import java.nio.file.Path;

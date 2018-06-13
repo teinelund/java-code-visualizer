@@ -42,11 +42,11 @@ class MavenProjectImplTest {
 
     List<JavaTypeDeclarationPath> createJavaTypeDeclarationPaths() {
         List<JavaTypeDeclarationPath> list = new LinkedList<>();
-        list.add(JavaTypeDeclarationPathImpl.builder().setName(CLASS_NAME_1).setPackageName(PACKAGE_PATH_1).
+        list.add(JavaTypeDeclarationPathBuilder.builder().setName(CLASS_NAME_1).setPackageName(PACKAGE_PATH_1).
                 setPathToTypeDeclaration(PATH_1).setAccessModifier(AccessModifier.PUBLIC).setJavaType(JavaType.CLASS).build());
-        list.add(JavaTypeDeclarationPathImpl.builder().setName(CLASS_NAME_2).setPackageName(PACKAGE_PATH_1).
+        list.add(JavaTypeDeclarationPathBuilder.builder().setName(CLASS_NAME_2).setPackageName(PACKAGE_PATH_1).
                 setPathToTypeDeclaration(PATH_2).setAccessModifier(AccessModifier.PUBLIC).setJavaType(JavaType.CLASS).build());
-        list.add(JavaTypeDeclarationPathImpl.builder().setName(CLASS_NAME_3).setPackageName(PACKAGE_PATH_2).
+        list.add(JavaTypeDeclarationPathBuilder.builder().setName(CLASS_NAME_3).setPackageName(PACKAGE_PATH_2).
                 setPathToTypeDeclaration(PATH_3).setAccessModifier(AccessModifier.PUBLIC).setJavaType(JavaType.CLASS).build());
         return list;
     }

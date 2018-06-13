@@ -17,13 +17,13 @@ class JavaTypeDeclarationPathImpl implements JavaTypeDeclarationPath {
     private TypeDeclaration<?> typeDeclaration;
     private List<Field> fields;
 
-    private JavaTypeDeclarationPathImpl( JavaTypeDeclarationPathBuilder javaTypeDeclarationPathBuilder) {
-        this.name = javaTypeDeclarationPathBuilder.name;
-        this.packageName = javaTypeDeclarationPathBuilder.packageName;
-        this.pathToTypeDeclaration = javaTypeDeclarationPathBuilder.pathToTypeDeclaration;
-        this.javaType = javaTypeDeclarationPathBuilder.javaType;
-        this.accessModifier = javaTypeDeclarationPathBuilder.accessModifier;
-        this.typeDeclaration = javaTypeDeclarationPathBuilder.typeDeclaration;
+    public JavaTypeDeclarationPathImpl( JavaTypeDeclarationPathBuilder javaTypeDeclarationPathBuilder) {
+        this.name = javaTypeDeclarationPathBuilder.getName();
+        this.packageName = javaTypeDeclarationPathBuilder.getPackageName();
+        this.pathToTypeDeclaration = javaTypeDeclarationPathBuilder.getPathToTypeDeclaration();
+        this.javaType = javaTypeDeclarationPathBuilder.getJavaType();
+        this.accessModifier = javaTypeDeclarationPathBuilder.getAccessModifier();
+        this.typeDeclaration = javaTypeDeclarationPathBuilder.getTypeDeclaration();
         this.fields = new LinkedList<>();
     }
 
@@ -67,53 +67,5 @@ class JavaTypeDeclarationPathImpl implements JavaTypeDeclarationPath {
         return Collections.unmodifiableList(this.fields);
     }
 
-    public static JavaTypeDeclarationPathBuilder builder() {
-        return new JavaTypeDeclarationPathBuilder();
-    }
 
-    public static class JavaTypeDeclarationPathBuilder {
-        private String name;
-        private String packageName;
-        private Path pathToTypeDeclaration;
-        private JavaType javaType;
-        private AccessModifier accessModifier;
-        private TypeDeclaration<?> typeDeclaration;
-
-
-        public JavaTypeDeclarationPathBuilder setName(String name) {
-            this.name = name;
-            return this;
-        }
-
-        public JavaTypeDeclarationPathBuilder setPackageName(String packageName) {
-            this.packageName = packageName;
-            return this;
-        }
-
-        public JavaTypeDeclarationPathBuilder setPathToTypeDeclaration(Path pathToTypeDeclaration) {
-            this.pathToTypeDeclaration = pathToTypeDeclaration;
-            return this;
-        }
-
-        public JavaTypeDeclarationPathBuilder setJavaType(JavaType javaType) {
-            this.javaType = javaType;
-            return this;
-        }
-
-        public JavaTypeDeclarationPathBuilder setAccessModifier(AccessModifier accessModifier) {
-            this.accessModifier = accessModifier;
-            return this;
-        }
-
-        public JavaTypeDeclarationPathBuilder setTypeDeclaration(TypeDeclaration<?> typeDeclaration) {
-            this.typeDeclaration = typeDeclaration;
-            return this;
-        }
-
-
-
-        public JavaTypeDeclarationPath build() {
-            return new JavaTypeDeclarationPathImpl( this );
-        }
-    }
 }

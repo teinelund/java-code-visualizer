@@ -1,4 +1,4 @@
-package org.teinelund.javacodevisualizer.dom;
+package org.teinelund.javacodevisualizer.factory;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
@@ -10,6 +10,13 @@ import com.github.javaparser.ast.body.EnumDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
+import org.teinelund.javacodevisualizer.dom.AccessModifier;
+import org.teinelund.javacodevisualizer.dom.DomainObjectModelFactory;
+import org.teinelund.javacodevisualizer.dom.JavaProjectObjectModel;
+import org.teinelund.javacodevisualizer.dom.JavaType;
+import org.teinelund.javacodevisualizer.dom.JavaTypeDeclarationPath;
+import org.teinelund.javacodevisualizer.dom.JavaTypeDeclarationPathBuilder;
+import org.teinelund.javacodevisualizer.dom.MavenProject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -28,7 +35,7 @@ public class JavaProjectObjectModelFactoryImpl implements JavaProjectObjectModel
     public JavaProjectObjectModel createrAndStore(List<Path> javaProjectPaths, List<Path> excludePaths, Path storagePath) throws IOException {
         List<Path> mavenProjectPaths = getMavenProjectPaths(javaProjectPaths, excludePaths);
         List<MavenProject> mavenProjects = getMavenProjects(mavenProjectPaths);
-        JavaProjectObjectModel jpom = new JavaProjectObjectModelImpl();
+        JavaProjectObjectModel jpom = DomainObjectModelFactory.instnace().createJavaProjectObjectModel();
         wireClasses(jpom, mavenProjects);
         return jpom;
     }
@@ -174,7 +181,7 @@ public class JavaProjectObjectModelFactoryImpl implements JavaProjectObjectModel
                 }
             }
             List<JavaTypeDeclarationPath> javaTypeDeclarationPaths = findJavaClassPathsInSrcDirectory(srcDirectory);
-            MavenProject mp = new MavenProjectImpl(path, javaTypeDeclarationPaths);
+            MavenProject mp = DomainObjectModelFactory.instnace().createMavenProject(path, javaTypeDeclarationPaths);
             mavenProjects.add(mp);
         }
         return mavenProjects;
@@ -260,7 +267,7 @@ public class JavaProjectObjectModelFactoryImpl implements JavaProjectObjectModel
                 name = enumDeclaration.getNameAsString();
                 javaType = JavaType.ENUM;
             }
-            javaTypeDeclarationPaths.add(new JavaTypeDeclarationPathImpl.JavaTypeDeclarationPathBuilder().setName(name).
+            javaTypeDeclarationPaths.add(JavaTypeDeclarationPathBuilder.builder().setName(name).
                     setPackageName(packageName).setAccessModifier(accessModifier).setJavaType(javaType).
                     setPathToTypeDeclaration(path).setTypeDeclaration(typeDeclaration).build());
         }

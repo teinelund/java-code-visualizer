@@ -1,10 +1,6 @@
 package org.teinelund.javacodevisualizer.dom;
 
-import com.github.javaparser.ast.body.TypeDeclaration;
-
-import java.nio.file.Path;
-
-public class FieldImpl implements Field {
+class FieldImpl implements Field {
 
     private String name;
     private JavaTypeDeclarationPath type;

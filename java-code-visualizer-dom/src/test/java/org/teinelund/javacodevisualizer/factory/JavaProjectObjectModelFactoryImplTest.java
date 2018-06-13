@@ -1,4 +1,4 @@
-package org.teinelund.javacodevisualizer.dom;
+package org.teinelund.javacodevisualizer.factory;
 
 import com.google.common.jimfs.Configuration;
 import com.google.common.jimfs.Jimfs;
@@ -7,6 +7,13 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.teinelund.javacodevisualizer.dom.AccessModifier;
+import org.teinelund.javacodevisualizer.dom.DomainObjectModelFactory;
+import org.teinelund.javacodevisualizer.dom.JavaProjectObjectModel;
+import org.teinelund.javacodevisualizer.dom.JavaType;
+import org.teinelund.javacodevisualizer.dom.JavaTypeDeclarationPath;
+import org.teinelund.javacodevisualizer.dom.JavaTypeDeclarationPathBuilder;
+import org.teinelund.javacodevisualizer.dom.MavenProject;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -545,9 +552,9 @@ class JavaProjectObjectModelFactoryImplTest {
         @Override
         List<JavaTypeDeclarationPath> readJavaFile(Path path) throws IOException {
             List<JavaTypeDeclarationPath> list = new LinkedList<>();
-            JavaTypeDeclarationPath jtdp = JavaTypeDeclarationPathImpl.builder().build();
+            JavaTypeDeclarationPath jtdp = JavaTypeDeclarationPathBuilder.builder().build();
             list.add(jtdp);
-            jtdp = JavaTypeDeclarationPathImpl.builder().build();
+            jtdp = JavaTypeDeclarationPathBuilder.builder().build();
             list.add(jtdp);
             return list;
         }
@@ -575,8 +582,8 @@ class JavaProjectObjectModelFactoryImplTest {
         @Override
         List<JavaTypeDeclarationPath> findJavaClassPathsInSrcDirectory(Path path) throws IOException {
             List<JavaTypeDeclarationPath> list = new LinkedList<>();
-            list.add(JavaTypeDeclarationPathImpl.builder().setName("CLASS_1").build());
-            list.add(JavaTypeDeclarationPathImpl.builder().setName("CLASS_2").build());
+            list.add(JavaTypeDeclarationPathBuilder.builder().setName("CLASS_1").build());
+            list.add(JavaTypeDeclarationPathBuilder.builder().setName("CLASS_2").build());
             return list;
         }
     }
@@ -597,7 +604,7 @@ class JavaProjectObjectModelFactoryImplTest {
     }
 
     JavaProjectObjectModel createJavaProjectObjectModel(JavaProjectObjectModelFactoryImpl sut) {
-        JavaProjectObjectModel jpom = new JavaProjectObjectModelImpl();
+        JavaProjectObjectModel jpom = DomainObjectModelFactory.instnace().createJavaProjectObjectModel();
         List<JavaTypeDeclarationPath> jtdps = sut.parseJavaFile(createJavaSourceFileContainingClassWithField(CLASS_NAME_CUSTOMER, "String", "name"), javaSourceFile);
         jpom.addJavaTypeDeclarationPaths(jtdps);
         jtdps = sut.parseJavaFile(createJavaSourceFileContainingClassWithField(CLASS_NAME_ORDER, CLASS_NAME_CUSTOMER, "customer"), javaSourceFile);

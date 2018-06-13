@@ -8,7 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-public class MavenProjectImpl implements MavenProject {
+class MavenProjectImpl implements MavenProject {
 
     /**
      * Name is not guarenteed to be unique. It is legal to have types with same name but different package name.
