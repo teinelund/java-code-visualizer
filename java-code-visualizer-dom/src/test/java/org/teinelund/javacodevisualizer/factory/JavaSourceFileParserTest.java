@@ -14,13 +14,13 @@ import org.teinelund.javacodevisualizer.dom.JavaTypeDeclarationPath;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
-import java.nio.file.DirectoryStream;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.teinelund.javacodevisualizer.factory.TestUtility.deleteDirectory;
 
 class JavaSourceFileParserTest {
 
@@ -55,26 +55,6 @@ class JavaSourceFileParserTest {
         if (Files.exists(srcPath)) {
             deleteDirectory(srcPath);
         }
-    }
-
-    /**
-     * Help method to delete a directory recursevly. Apache IO's FileUtils.delete(...) does not work with Google
-     * jimfs.
-     *
-     * @param path
-     * @throws IOException
-     */
-    void deleteDirectory(Path path) throws IOException {
-        DirectoryStream<Path> stream = Files.newDirectoryStream(path);
-        for (Path fileOrDirectoryPath : stream) {
-            if (Files.isRegularFile(fileOrDirectoryPath)) {
-                Files.delete(fileOrDirectoryPath);
-            }
-            if (Files.isDirectory(fileOrDirectoryPath)) {
-                deleteDirectory(fileOrDirectoryPath);
-            }
-        }
-        Files.delete(path);
     }
 
 

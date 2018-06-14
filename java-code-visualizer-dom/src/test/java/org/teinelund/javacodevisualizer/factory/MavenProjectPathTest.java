@@ -8,7 +8,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.nio.file.DirectoryStream;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,17 +16,20 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.teinelund.javacodevisualizer.factory.TestUtility.createMavenProject;
+import static org.teinelund.javacodevisualizer.factory.TestUtility.createSrcDirectoryWithSubDirectoriesWithJavaSourceCode;
+import static org.teinelund.javacodevisualizer.factory.TestUtility.deleteDirectory;
 
 class MavenProjectPathTest {
 
-    static FileSystem fs = null;
-    static MavenProjectPath sut = null;
+    private static FileSystem fs = null;
+    private static MavenProjectPath sut = null;
     static Path projectPath = null;
-    static Path srcPath = null;
-    static Path pomXmlPath = null;
-    static Path projectSubproject1Path = null;
-    static Path projectSubproject2Path = null;
-    static Path projectTargetPath = null;
+    private static Path srcPath = null;
+    private static Path pomXmlPath = null;
+    private static Path projectSubproject1Path = null;
+    private static Path projectSubproject2Path = null;
+    private static Path projectTargetPath = null;
 
 
     @BeforeAll
@@ -59,26 +61,6 @@ class MavenProjectPathTest {
         }
     }
 
-    /**
-     * Help method to delete a directory recursevly. Apache IO's FileUtils.delete(...) does not work with Google
-     * jimfs.
-     *
-     * @param path
-     * @throws IOException
-     */
-    void deleteDirectory(Path path) throws IOException {
-        DirectoryStream<Path> stream = Files.newDirectoryStream(path);
-        for (Path fileOrDirectoryPath : stream) {
-            if (Files.isRegularFile(fileOrDirectoryPath)) {
-                Files.delete(fileOrDirectoryPath);
-            }
-            if (Files.isDirectory(fileOrDirectoryPath)) {
-                deleteDirectory(fileOrDirectoryPath);
-            }
-        }
-        Files.delete(path);
-    }
-
 
     //
     // Contains Java Source Code
@@ -98,7 +80,7 @@ class MavenProjectPathTest {
     @Test
     void containsJavaSourceCodeWhereSrcDirectoryContainsSubDirectoriesWithJavaSourceCode() throws IOException {
         // Initialize
-        createSrcDirectoryWithSubDirectoriesWithJavaSourceCode(SrcDirectoryContentType.INCLUDE_JAVA_SOURCE_FILE);
+        createSrcDirectoryWithSubDirectoriesWithJavaSourceCode(fs, projectPath, srcPath, SrcDirectoryContentType.INCLUDE_JAVA_SOURCE_FILE);
         // Test
         boolean result = sut.containsJavaSourceCode(srcPath);
         // Verify
@@ -108,39 +90,11 @@ class MavenProjectPathTest {
     @Test
     void containsJavaSourceCodeWhereSrcDirectoryContainsSubDirectoriesWithNoJavaSourceCode() throws IOException {
         // Initialize
-        createSrcDirectoryWithSubDirectoriesWithJavaSourceCode(SrcDirectoryContentType.NO_JAVA_SOURCE_FILE);
+        createSrcDirectoryWithSubDirectoriesWithJavaSourceCode(fs, projectPath, srcPath, SrcDirectoryContentType.NO_JAVA_SOURCE_FILE);
         // Test
         boolean result = sut.containsJavaSourceCode(srcPath);
         // Verify
         assertFalse(result);
-    }
-
-    void createSrcDirectoryWithSubDirectoriesWithJavaSourceCode(SrcDirectoryContentType srcDirectoryContentType) throws IOException {
-        // src
-        Files.createDirectories(srcPath);
-        Path javaPath = fs.getPath(srcPath.toString(), "java");
-        Files.createDirectories(javaPath);
-        Path resourcePath = fs.getPath(srcPath.toString(), "resource");
-        Files.createDirectories(resourcePath);
-        Path readmePath = fs.getPath(srcPath.toString(), "README.txt");
-        Files.createFile(readmePath);
-        // java
-        Path myappPath = fs.getPath(javaPath.toString(), "myapp");
-        Files.createDirectories(myappPath);
-        // myapp : java/myapp/Application.java
-        Path path = null;
-        switch (srcDirectoryContentType) {
-            case INCLUDE_JAVA_SOURCE_FILE:
-                path = fs.getPath(myappPath.toString(), "Application.java");
-                Files.createFile(path);
-                break;
-            case NO_JAVA_SOURCE_FILE:
-                path = fs.getPath(myappPath.toString(), "TODO.txt");
-                Files.createFile(path);
-        }
-        // resource : resource/environment.properties
-        Path envpropPath = fs.getPath(resourcePath.toString(), "environment.properties");
-        Files.createFile(envpropPath);
     }
 
 
@@ -160,7 +114,7 @@ class MavenProjectPathTest {
     @Test
     void isMavenProjectWhereProjectOnlyContainsPomXmlFile() throws IOException {
         // Initialize
-        createMavenProject(ProjectType.PROJECT_WITHOUT_SRC_DIRECTORY);
+        createMavenProject(srcPath, pomXmlPath, ProjectType.PROJECT_WITHOUT_SRC_DIRECTORY);
         // Test
         boolean result = sut.isMavenProject(projectPath);
         // Verify
@@ -170,7 +124,7 @@ class MavenProjectPathTest {
     @Test
     void isMavenProjectWhereProjectOnlyContainsSrcDirectory() throws IOException {
         // Initialize
-        createMavenProject(ProjectType.PROJECT_WITHOUT_POM_XML_FILE);
+        createMavenProject(srcPath, pomXmlPath, ProjectType.PROJECT_WITHOUT_POM_XML_FILE);
         // Test
         boolean result = sut.isMavenProject(projectPath);
         // Verify
@@ -180,7 +134,7 @@ class MavenProjectPathTest {
     @Test
     void isMavenProjectWhereProjectDoesNotContainAnyJavaSourceCode() throws IOException {
         // Initialize
-        createMavenProject(ProjectType.LEGAL_PROJECT);
+        createMavenProject(srcPath, pomXmlPath, ProjectType.LEGAL_PROJECT);
         // Test
         boolean result = sut.isMavenProject(projectPath);
         // Verify
@@ -190,30 +144,13 @@ class MavenProjectPathTest {
     @Test
     void isMavenProjectWhereProjectIsLegal() throws IOException {
         // Initialize
-        createMavenProject(ProjectType.LEGAL_PROJECT);
+        createMavenProject(srcPath, pomXmlPath, ProjectType.LEGAL_PROJECT);
         MavenProjectPathMock2 sut = new MavenProjectPathMock2();
         // Test
         boolean result = sut.isMavenProject(projectPath);
         // Verify
         assertTrue(result);
     }
-
-    void createMavenProject(ProjectType projectType) throws IOException {
-        switch (projectType) {
-            case LEGAL_PROJECT:
-                Files.createDirectory(srcPath);
-                Files.createFile(pomXmlPath);
-                break;
-            case PROJECT_WITHOUT_POM_XML_FILE:
-                Files.createDirectory(srcPath);
-                break;
-            case PROJECT_WITHOUT_SRC_DIRECTORY:
-                Files.createFile(pomXmlPath);
-                break;
-        }
-    }
-
-
 
     //
     // Get Maven Project Paths
