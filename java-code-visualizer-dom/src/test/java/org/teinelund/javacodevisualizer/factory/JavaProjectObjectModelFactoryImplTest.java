@@ -5,12 +5,9 @@ import com.google.common.jimfs.Jimfs;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.teinelund.javacodevisualizer.dom.AccessModifier;
 import org.teinelund.javacodevisualizer.dom.DomainObjectModelFactory;
 import org.teinelund.javacodevisualizer.dom.JavaProjectObjectModel;
-import org.teinelund.javacodevisualizer.dom.JavaType;
 import org.teinelund.javacodevisualizer.dom.JavaTypeDeclarationPath;
 import org.teinelund.javacodevisualizer.dom.JavaTypeDeclarationPathBuilder;
 import org.teinelund.javacodevisualizer.dom.MavenProject;
@@ -26,8 +23,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class JavaProjectObjectModelFactoryImplTest {
 
@@ -36,10 +31,11 @@ class JavaProjectObjectModelFactoryImplTest {
     private static Path projectPath = null;
     private static Path srcPath = null;
     private static Path pomXmlPath = null;
-    private static Path projectSubproject1Path = null;
-    private static Path projectSubproject2Path = null;
-    private static Path projectTargetPath = null;
     private static Path javaSourceFile = null;
+
+    private final String PACKAGE_NAME = "org.teinelund";
+    private final String CLASS_NAME_CUSTOMER = "Customer";
+    private final String CLASS_NAME_ORDER = "Order";
 
     @BeforeAll
     static void setup() {
@@ -48,9 +44,6 @@ class JavaProjectObjectModelFactoryImplTest {
         projectPath = fs.getPath("/Users/Cody/Projects/Project");
         srcPath = fs.getPath(projectPath.toString(), "src");
         pomXmlPath = fs.getPath(projectPath.toString(), "pom.xml");
-        projectSubproject1Path = fs.getPath("/Users/Cody/Projects/Project/SubProject1");
-        projectSubproject2Path = fs.getPath("/Users/Cody/Projects/Project/SubProject2");
-        projectTargetPath = fs.getPath("/Users/Cody/Projects/Project/target");
         javaSourceFile = fs.getPath(srcPath.toString(), "org/teinelund/customer.java");
     }
 
@@ -89,435 +82,6 @@ class JavaProjectObjectModelFactoryImplTest {
             }
         }
         Files.delete(path);
-    }
-
-    //
-    // Contains Java Source Code
-    //
-
-    @Test
-    void containsJavaSourceCodeWhereSrcDirectoryIsEmpty() throws IOException {
-        // Initialize
-        Files.createDirectories(srcPath);
-        // Test
-        boolean result = sut.containsJavaSourceCode(srcPath);
-        // Verify
-        assertFalse(result);
-    }
-
-    @Test
-    void containsJavaSourceCodeWhereSrcDirectoryContainsSubDirectoriesWithJavaSourceCode() throws IOException {
-        // Initialize
-        createSrcDirectoryWithSubDirectoriesWithJavaSourceCode(SrcDirectoryContentType.INCLUDE_JAVA_SOURCE_FILE);
-        // Test
-        boolean result = sut.containsJavaSourceCode(srcPath);
-        // Verify
-        assertTrue(result);
-    }
-
-    @Test
-    void containsJavaSourceCodeWhereSrcDirectoryContainsSubDirectoriesWithNoJavaSourceCode() throws IOException {
-        // Initialize
-        createSrcDirectoryWithSubDirectoriesWithJavaSourceCode(SrcDirectoryContentType.NO_JAVA_SOURCE_FILE);
-        // Test
-        boolean result = sut.containsJavaSourceCode(srcPath);
-        // Verify
-        assertFalse(result);
-    }
-
-    void createSrcDirectoryWithSubDirectoriesWithJavaSourceCode(SrcDirectoryContentType srcDirectoryContentType) throws IOException {
-        // src
-        Files.createDirectories(srcPath);
-        Path javaPath = fs.getPath(srcPath.toString(), "java");
-        Files.createDirectories(javaPath);
-        Path resourcePath = fs.getPath(srcPath.toString(), "resource");
-        Files.createDirectories(resourcePath);
-        Path readmePath = fs.getPath(srcPath.toString(), "README.txt");
-        Files.createFile(readmePath);
-        // java
-        Path myappPath = fs.getPath(javaPath.toString(), "myapp");
-        Files.createDirectories(myappPath);
-        // myapp : java/myapp/Application.java
-        Path path = null;
-        switch (srcDirectoryContentType) {
-            case INCLUDE_JAVA_SOURCE_FILE:
-                path = fs.getPath(myappPath.toString(), "Application.java");
-                Files.createFile(path);
-                break;
-            case NO_JAVA_SOURCE_FILE:
-                path = fs.getPath(myappPath.toString(), "TODO.txt");
-                Files.createFile(path);
-        }
-        // resource : resource/environment.properties
-        Path envpropPath = fs.getPath(resourcePath.toString(), "environment.properties");
-        Files.createFile(envpropPath);
-    }
-
-    //
-    // Is Maven Project
-    //
-
-    @Test
-    void isMavenProjectWhereProjectPathIsEmpty() throws IOException {
-        // Initialize
-        // Test
-        boolean result = sut.isMavenProject(projectPath);
-        // Verify
-        assertFalse(result);
-    }
-
-    @Test
-    void isMavenProjectWhereProjectOnlyContainsPomXmlFile() throws IOException {
-        // Initialize
-        createMavenProject(ProjectType.PROJECT_WITHOUT_SRC_DIRECTORY);
-        // Test
-        boolean result = sut.isMavenProject(projectPath);
-        // Verify
-        assertFalse(result);
-    }
-
-    @Test
-    void isMavenProjectWhereProjectOnlyContainsSrcDirectory() throws IOException {
-        // Initialize
-        createMavenProject(ProjectType.PROJECT_WITHOUT_POM_XML_FILE);
-        // Test
-        boolean result = sut.isMavenProject(projectPath);
-        // Verify
-        assertFalse(result);
-    }
-
-    @Test
-    void isMavenProjectWhereProjectDoesNotContainAnyJavaSourceCode() throws IOException {
-        // Initialize
-        createMavenProject(ProjectType.LEGAL_PROJECT);
-        // Test
-        boolean result = sut.isMavenProject(projectPath);
-        // Verify
-        assertFalse(result);
-    }
-
-    @Test
-    void isMavenProjectWhereProjectIsLegal() throws IOException {
-        // Initialize
-        createMavenProject(ProjectType.LEGAL_PROJECT);
-        JavaProjectObjectModelFactoryImplMock sut = new JavaProjectObjectModelFactoryImplMock();
-        // Test
-        boolean result = sut.isMavenProject(projectPath);
-        // Verify
-        assertTrue(result);
-    }
-
-    void createMavenProject(ProjectType projectType) throws IOException {
-        switch (projectType) {
-            case LEGAL_PROJECT:
-                Files.createDirectory(srcPath);
-                Files.createFile(pomXmlPath);
-                break;
-            case PROJECT_WITHOUT_POM_XML_FILE:
-                Files.createDirectory(srcPath);
-                break;
-            case PROJECT_WITHOUT_SRC_DIRECTORY:
-                Files.createFile(pomXmlPath);
-                break;
-        }
-    }
-
-    //
-    // Get Maven Project Paths
-    //
-
-    @Test
-    void getMavenProjectWherePathDoesNotExist() throws IOException {
-        // Initialize
-        List<Path> excludePaths = new LinkedList<>();
-        Path path = fs.getPath("/this/path/does/not/exist");
-        // Test
-        List<Path> result = sut.getMavenProjectPaths(path, excludePaths);
-        // Verify
-        assertTrue(result.isEmpty());
-    }
-
-
-    @Test
-    void getMavenProjectWherePathExistInExcludePaths() throws IOException {
-        // Initialize
-        List<Path> excludePaths = new LinkedList<>();
-        Path path = fs.getPath("/Users/Cody/Projects/Project");
-        excludePaths.add(path);
-        // Test
-        List<Path> result = sut.getMavenProjectPaths(projectPath, excludePaths);
-        // Verify
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    void getMavenProjectWhereProjectIsLegal() throws IOException {
-        // Initialize
-        List<Path> excludePaths = new LinkedList<>();
-        JavaProjectObjectModelFactoryImplMock2 sut = new JavaProjectObjectModelFactoryImplMock2(true);
-        final int EXPECTED_SIZE = 1;
-        // Test
-        List<Path> result = sut.getMavenProjectPaths(projectPath, excludePaths);
-        // Verify
-        assertThat(result.size()).isEqualTo(EXPECTED_SIZE);
-    }
-
-    @Test
-    void getMavenProjectWhereProjectContainsTwoSubProjects() throws IOException {
-        // Initialize
-        List<Path> excludePaths = new LinkedList<>();
-        JavaProjectObjectModelFactoryImplMock2 sut = new JavaProjectObjectModelFactoryImplMock2(false);
-        createSubProjects(false);
-        final int EXPECTED_SIZE = 2;
-        // Test
-        List<Path> result = sut.getMavenProjectPaths(projectPath, excludePaths);
-        // Verify
-        assertThat(result.size()).isEqualTo(EXPECTED_SIZE);
-    }
-
-    @Test
-    void getMavenProjectWhereProjectContainsTwoSubProjectsAndTargetDirectory() throws IOException {
-        // Initialize
-        List<Path> excludePaths = new LinkedList<>();
-        JavaProjectObjectModelFactoryImplMock2 sut = new JavaProjectObjectModelFactoryImplMock2(false);
-        createSubProjects(true);
-        final int EXPECTED_SIZE = 2;
-        // Test
-        List<Path> result = sut.getMavenProjectPaths(projectPath, excludePaths);
-        // Verify
-        assertThat(result.size()).isEqualTo(EXPECTED_SIZE);
-    }
-
-    void createSubProjects(boolean createTargetDirectory) throws IOException {
-        // src
-        Files.createDirectories(projectSubproject1Path);
-        Files.createDirectories(projectSubproject2Path);
-        if (createTargetDirectory) {
-            Files.createDirectories(projectTargetPath);
-        }
-    }
-
-    enum SrcDirectoryContentType {INCLUDE_JAVA_SOURCE_FILE, NO_JAVA_SOURCE_FILE;}
-
-    enum ProjectType {LEGAL_PROJECT, PROJECT_WITHOUT_SRC_DIRECTORY, PROJECT_WITHOUT_POM_XML_FILE;}
-
-    class JavaProjectObjectModelFactoryImplMock extends JavaProjectObjectModelFactoryImpl {
-
-        @Override
-        boolean containsJavaSourceCode(Path path) throws IOException {
-            return true;
-        }
-    }
-
-    class JavaProjectObjectModelFactoryImplMock2 extends JavaProjectObjectModelFactoryImpl {
-
-        private boolean isProjectLegalMavenProject = false;
-
-        public JavaProjectObjectModelFactoryImplMock2(boolean isProjectLegalMavenProject) {
-            this.isProjectLegalMavenProject = isProjectLegalMavenProject;
-        }
-
-        @Override
-        boolean isMavenProject(Path path) throws IOException {
-            if (projectPath.equals(path)) {
-                return this.isProjectLegalMavenProject;
-            }
-            return true;
-        }
-    }
-
-
-
-    //
-    // Parse Java File
-    //
-
-
-
-    private final String CLASS_NAME = "Customer";
-    private final String INNER_CLASS_NAME = "CustomerCreditCard";
-    private final String PACKAGE_NAME = "org.teinelund";
-    private final String CLASS_NAME_CUSTOMER = "Customer";
-    private final String CLASS_NAME_ORDER = "Order";
-
-
-    @Test
-    void parseJavaFileWhereSourceFileIsAClass() {
-        // Initialize
-        final int EXPECTED_SIZE = 1;
-        Reader reader = createJavaSourceFileContainingAClassReader();
-        // Test
-        List<JavaTypeDeclarationPath> result = sut.parseJavaFile(reader, javaSourceFile);
-        // Verify
-        assertThat(result).isNotNull();
-        assertThat(result.size()).isEqualTo(EXPECTED_SIZE);
-        assertThat(result.get(0)).isNotNull();
-        assertThat(result.get(0).getName()).isEqualTo(CLASS_NAME);
-        assertThat(result.get(0).getJavaType()).isEqualTo(JavaType.CLASS);
-        assertThat(result.get(0).getAccessModifier()).isEqualTo(AccessModifier.PUBLIC);
-        assertThat(result.get(0).getPackageName()).isEqualTo(PACKAGE_NAME);
-        assertThat(result.get(0).getPathToTypeDeclaration()).isEqualTo(javaSourceFile);
-    }
-
-    Reader createJavaSourceFileContainingAClassReader() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("package " + PACKAGE_NAME + ";"); sb.append(java.lang.System.lineSeparator());
-        sb.append(""); sb.append(java.lang.System.lineSeparator());
-        sb.append("import java.io.IOException;"); sb.append(java.lang.System.lineSeparator());
-        sb.append(""); sb.append(java.lang.System.lineSeparator());
-        sb.append("public class " + CLASS_NAME + " {"); sb.append(java.lang.System.lineSeparator());
-        sb.append("   private String name;"); sb.append(java.lang.System.lineSeparator());
-        sb.append(""); sb.append(java.lang.System.lineSeparator());
-        sb.append("   public void setName(String name) {"); sb.append(java.lang.System.lineSeparator());
-        sb.append("      this.name = name;"); sb.append(java.lang.System.lineSeparator());
-        sb.append("   }"); sb.append(java.lang.System.lineSeparator());
-        sb.append("}"); sb.append(java.lang.System.lineSeparator());
-        return new StringReader(sb.toString());
-    }
-
-    @Test
-    void parseJavaFileWhereSourceFileIsAInterface() {
-        // Initialize
-        final int EXPECTED_SIZE = 1;
-        Reader reader = createJavaSourceFileContainingAInterfaceReader();
-        // Test
-        List<JavaTypeDeclarationPath> result = sut.parseJavaFile(reader, javaSourceFile);
-        // Verify
-        assertThat(result).isNotNull();
-        assertThat(result.size()).isEqualTo(EXPECTED_SIZE);
-        assertThat(result.get(0)).isNotNull();
-        assertThat(result.get(0).getName()).isEqualTo(CLASS_NAME);
-        assertThat(result.get(0).getJavaType()).isEqualTo(JavaType.INTERFACE);
-        assertThat(result.get(0).getAccessModifier()).isEqualTo(AccessModifier.PUBLIC);
-        assertThat(result.get(0).getPackageName()).isEqualTo(PACKAGE_NAME);
-        assertThat(result.get(0).getPathToTypeDeclaration()).isEqualTo(javaSourceFile);
-    }
-
-    Reader createJavaSourceFileContainingAInterfaceReader() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("package " + PACKAGE_NAME + ";"); sb.append(java.lang.System.lineSeparator());
-        sb.append(""); sb.append(java.lang.System.lineSeparator());
-        sb.append("import java.io.IOException;"); sb.append(java.lang.System.lineSeparator());
-        sb.append(""); sb.append(java.lang.System.lineSeparator());
-        sb.append("public interface " + CLASS_NAME + " {"); sb.append(java.lang.System.lineSeparator());
-        sb.append(""); sb.append(java.lang.System.lineSeparator());
-        sb.append("   public void setName(String name);"); sb.append(java.lang.System.lineSeparator());
-        sb.append("}"); sb.append(java.lang.System.lineSeparator());
-        return new StringReader(sb.toString());
-    }
-
-    @Test
-    void parseJavaFileWhereSourceFileIsAEnum() {
-        // Initialize
-        final int EXPECTED_SIZE = 1;
-        Reader reader = createJavaSourceFileContainingAEnumReader();
-        // Test
-        List<JavaTypeDeclarationPath> result = sut.parseJavaFile(reader, javaSourceFile);
-        // Verify
-        assertThat(result).isNotNull();
-        assertThat(result.size()).isEqualTo(EXPECTED_SIZE);
-        assertThat(result.get(0)).isNotNull();
-        assertThat(result.get(0).getName()).isEqualTo(CLASS_NAME);
-        assertThat(result.get(0).getJavaType()).isEqualTo(JavaType.ENUM);
-        assertThat(result.get(0).getAccessModifier()).isEqualTo(AccessModifier.PUBLIC);
-        assertThat(result.get(0).getPackageName()).isEqualTo(PACKAGE_NAME);
-        assertThat(result.get(0).getPathToTypeDeclaration()).isEqualTo(javaSourceFile);
-    }
-
-    Reader createJavaSourceFileContainingAEnumReader() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("package " + PACKAGE_NAME + ";"); sb.append(java.lang.System.lineSeparator());
-        sb.append(""); sb.append(java.lang.System.lineSeparator());
-        sb.append("import java.io.IOException;"); sb.append(java.lang.System.lineSeparator());
-        sb.append(""); sb.append(java.lang.System.lineSeparator());
-        sb.append("public enum " + CLASS_NAME + " {"); sb.append(java.lang.System.lineSeparator());
-        sb.append(""); sb.append(java.lang.System.lineSeparator());
-        sb.append("   NORMAL_CUSTOMER, VIP_CUSTOMER;"); sb.append(java.lang.System.lineSeparator());
-        sb.append("}"); sb.append(java.lang.System.lineSeparator());
-        return new StringReader(sb.toString());
-    }
-
-    @Test
-    void parseJavaFileWhereSourceFileContainsClassAndEnum() {
-        // Initialize
-        final int EXPECTED_SIZE = 2;
-        Reader reader = createJavaSourceFileContainingClassAndEnumReader();
-        // Test
-        List<JavaTypeDeclarationPath> result = sut.parseJavaFile(reader, javaSourceFile);
-        // Verify
-        assertThat(result).isNotNull();
-        assertThat(result.size()).isEqualTo(EXPECTED_SIZE);
-        assertThat(result.get(0)).isNotNull();
-        assertThat(result.get(0).getName()).isEqualTo(CLASS_NAME);
-        assertThat(result.get(0).getJavaType()).isEqualTo(JavaType.CLASS);
-        assertThat(result.get(0).getAccessModifier()).isEqualTo(AccessModifier.PUBLIC);
-        assertThat(result.get(0).getPackageName()).isEqualTo(PACKAGE_NAME);
-        assertThat(result.get(0).getPathToTypeDeclaration()).isEqualTo(javaSourceFile);
-        assertThat(result.get(1)).isNotNull();
-        assertThat(result.get(1).getName()).isEqualTo(CLASS_NAME);
-        assertThat(result.get(1).getJavaType()).isEqualTo(JavaType.ENUM);
-        assertThat(result.get(1).getAccessModifier()).isEqualTo(AccessModifier.PACKAGE);
-        assertThat(result.get(1).getPackageName()).isEqualTo(PACKAGE_NAME);
-        assertThat(result.get(1).getPathToTypeDeclaration()).isEqualTo(javaSourceFile);
-    }
-
-    Reader createJavaSourceFileContainingClassAndEnumReader() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("package " + PACKAGE_NAME + ";"); sb.append(java.lang.System.lineSeparator());
-        sb.append(""); sb.append(java.lang.System.lineSeparator());
-        sb.append("import java.io.IOException;"); sb.append(java.lang.System.lineSeparator());
-        sb.append(""); sb.append(java.lang.System.lineSeparator());
-        sb.append("public class " + CLASS_NAME + " {"); sb.append(java.lang.System.lineSeparator());
-        sb.append("   private String name;"); sb.append(java.lang.System.lineSeparator());
-        sb.append(""); sb.append(java.lang.System.lineSeparator());
-        sb.append("   public void setName(String name) {"); sb.append(java.lang.System.lineSeparator());
-        sb.append("      this.name = name;"); sb.append(java.lang.System.lineSeparator());
-        sb.append("   }"); sb.append(java.lang.System.lineSeparator());
-        sb.append("}"); sb.append(java.lang.System.lineSeparator());
-        sb.append(""); sb.append(java.lang.System.lineSeparator());
-        sb.append("enum " + CLASS_NAME + " {"); sb.append(java.lang.System.lineSeparator());
-        sb.append(""); sb.append(java.lang.System.lineSeparator());
-        sb.append("   NORMAL_CUSTOMER, VIP_CUSTOMER;"); sb.append(java.lang.System.lineSeparator());
-        sb.append("}"); sb.append(java.lang.System.lineSeparator());
-        return new StringReader(sb.toString());
-    }
-
-    //
-    // NOTE! TEST IS DISABLED !!!!
-    //
-    @Disabled
-    @Test
-    void parseJavaFileWhereSourceFileContainsClassAndInnerClass() {
-        // Initialize
-        final int EXPECTED_SIZE = 1;
-        Reader reader = createJavaSourceFileContainingClassAndInnerClass();
-        // Test
-        List<JavaTypeDeclarationPath> result = sut.parseJavaFile(reader, javaSourceFile);
-        // Verify
-        assertThat(result).isNotNull();
-        assertThat(result.size()).isEqualTo(EXPECTED_SIZE);
-        assertThat(result.get(0)).isNotNull();
-        assertThat(result.get(0).getName()).isEqualTo(CLASS_NAME);
-        assertThat(result.get(0).getJavaType()).isEqualTo(JavaType.CLASS);
-        assertThat(result.get(0).getAccessModifier()).isEqualTo(AccessModifier.PUBLIC);
-        assertThat(result.get(0).getPackageName()).isEqualTo(PACKAGE_NAME);
-        assertThat(result.get(0).getPathToTypeDeclaration()).isEqualTo(javaSourceFile);
-    }
-
-    Reader createJavaSourceFileContainingClassAndInnerClass() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("package " + PACKAGE_NAME + ";"); sb.append(java.lang.System.lineSeparator());
-        sb.append(""); sb.append(java.lang.System.lineSeparator());
-        sb.append("import java.io.IOException;"); sb.append(java.lang.System.lineSeparator());
-        sb.append(""); sb.append(java.lang.System.lineSeparator());
-        sb.append("public class " + CLASS_NAME + " {"); sb.append(java.lang.System.lineSeparator());
-        sb.append("   private String name;"); sb.append(java.lang.System.lineSeparator());
-        sb.append(""); sb.append(java.lang.System.lineSeparator());
-        sb.append("   public class " + INNER_CLASS_NAME + " {"); sb.append(java.lang.System.lineSeparator());
-        sb.append("      private String name;"); sb.append(java.lang.System.lineSeparator());
-        sb.append("   }"); sb.append(java.lang.System.lineSeparator());
-        sb.append("}"); sb.append(java.lang.System.lineSeparator());
-        return new StringReader(sb.toString());
     }
 
 
@@ -560,9 +124,41 @@ class JavaProjectObjectModelFactoryImplTest {
         }
     }
 
+    void createSrcDirectoryWithSubDirectoriesWithJavaSourceCode(JavaProjectObjectModelFactoryImplTest.SrcDirectoryContentType srcDirectoryContentType) throws IOException {
+        // src
+        Files.createDirectories(srcPath);
+        Path javaPath = fs.getPath(srcPath.toString(), "java");
+        Files.createDirectories(javaPath);
+        Path resourcePath = fs.getPath(srcPath.toString(), "resource");
+        Files.createDirectories(resourcePath);
+        Path readmePath = fs.getPath(srcPath.toString(), "README.txt");
+        Files.createFile(readmePath);
+        // java
+        Path myappPath = fs.getPath(javaPath.toString(), "myapp");
+        Files.createDirectories(myappPath);
+        // myapp : java/myapp/Application.java
+        Path path = null;
+        switch (srcDirectoryContentType) {
+            case INCLUDE_JAVA_SOURCE_FILE:
+                path = fs.getPath(myappPath.toString(), "Application.java");
+                Files.createFile(path);
+                break;
+            case NO_JAVA_SOURCE_FILE:
+                path = fs.getPath(myappPath.toString(), "TODO.txt");
+                Files.createFile(path);
+        }
+        // resource : resource/environment.properties
+        Path envpropPath = fs.getPath(resourcePath.toString(), "environment.properties");
+        Files.createFile(envpropPath);
+    }
+
+    enum SrcDirectoryContentType {INCLUDE_JAVA_SOURCE_FILE, NO_JAVA_SOURCE_FILE;}
+
+
     //
     // get Maven Projects
     //
+
     @Test
     public void getMavenProjects() throws IOException {
         // Initialize
@@ -577,6 +173,21 @@ class JavaProjectObjectModelFactoryImplTest {
         assertThat(result.get(0).getAllTypeNames().size()).isEqualTo(2);
     }
 
+    void createMavenProject(JavaProjectObjectModelFactoryImplTest.ProjectType projectType) throws IOException {
+        switch (projectType) {
+            case LEGAL_PROJECT:
+                Files.createDirectory(srcPath);
+                Files.createFile(pomXmlPath);
+                break;
+            case PROJECT_WITHOUT_POM_XML_FILE:
+                Files.createDirectory(srcPath);
+                break;
+            case PROJECT_WITHOUT_SRC_DIRECTORY:
+                Files.createFile(pomXmlPath);
+                break;
+        }
+    }
+
     class JavaProjectObjectModelFactoryImplMock4 extends JavaProjectObjectModelFactoryImpl {
 
         @Override
@@ -588,6 +199,10 @@ class JavaProjectObjectModelFactoryImplTest {
         }
     }
 
+    enum ProjectType {LEGAL_PROJECT, PROJECT_WITHOUT_SRC_DIRECTORY, PROJECT_WITHOUT_POM_XML_FILE;}
+
+
+    
     //
     // wire Classes
     //
@@ -600,14 +215,19 @@ class JavaProjectObjectModelFactoryImplTest {
         // Test
         sut.wireClassFields(jdom);
         // Verify
-        assertThat(jdom.getAllTypesGivenName(CLASS_NAME_ORDER).get(0).getFields().get(0).getType().getName()).isEqualTo(CLASS_NAME_CUSTOMER);
+        assertThat(jdom.getAllTypesGivenName(CLASS_NAME_ORDER).get(0).getFields().get(0).getType().getName()).
+                isEqualTo(CLASS_NAME_CUSTOMER);
     }
 
     JavaProjectObjectModel createJavaProjectObjectModel(JavaProjectObjectModelFactoryImpl sut) {
         JavaProjectObjectModel jpom = DomainObjectModelFactory.instnace().createJavaProjectObjectModel();
-        List<JavaTypeDeclarationPath> jtdps = sut.parseJavaFile(createJavaSourceFileContainingClassWithField(CLASS_NAME_CUSTOMER, "String", "name"), javaSourceFile);
+        List<JavaTypeDeclarationPath> jtdps = JavaSourceFileParser.instance().parseJavaFile(
+                createJavaSourceFileContainingClassWithField(CLASS_NAME_CUSTOMER, "String", "name"),
+                javaSourceFile);
         jpom.addJavaTypeDeclarationPaths(jtdps);
-        jtdps = sut.parseJavaFile(createJavaSourceFileContainingClassWithField(CLASS_NAME_ORDER, CLASS_NAME_CUSTOMER, "customer"), javaSourceFile);
+        jtdps = JavaSourceFileParser.instance().parseJavaFile(
+                createJavaSourceFileContainingClassWithField(CLASS_NAME_ORDER, CLASS_NAME_CUSTOMER, "customer"),
+                javaSourceFile);
         jpom.addJavaTypeDeclarationPaths(jtdps);
         return jpom;
     }
