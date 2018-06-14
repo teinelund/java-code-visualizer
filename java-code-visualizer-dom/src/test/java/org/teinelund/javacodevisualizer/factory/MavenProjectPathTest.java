@@ -98,7 +98,7 @@ class MavenProjectPathTest {
     @Test
     void containsJavaSourceCodeWhereSrcDirectoryContainsSubDirectoriesWithJavaSourceCode() throws IOException {
         // Initialize
-        createSrcDirectoryWithSubDirectoriesWithJavaSourceCode(JavaProjectObjectModelFactoryImplTest.SrcDirectoryContentType.INCLUDE_JAVA_SOURCE_FILE);
+        createSrcDirectoryWithSubDirectoriesWithJavaSourceCode(SrcDirectoryContentType.INCLUDE_JAVA_SOURCE_FILE);
         // Test
         boolean result = sut.containsJavaSourceCode(srcPath);
         // Verify
@@ -108,14 +108,14 @@ class MavenProjectPathTest {
     @Test
     void containsJavaSourceCodeWhereSrcDirectoryContainsSubDirectoriesWithNoJavaSourceCode() throws IOException {
         // Initialize
-        createSrcDirectoryWithSubDirectoriesWithJavaSourceCode(JavaProjectObjectModelFactoryImplTest.SrcDirectoryContentType.NO_JAVA_SOURCE_FILE);
+        createSrcDirectoryWithSubDirectoriesWithJavaSourceCode(SrcDirectoryContentType.NO_JAVA_SOURCE_FILE);
         // Test
         boolean result = sut.containsJavaSourceCode(srcPath);
         // Verify
         assertFalse(result);
     }
 
-    void createSrcDirectoryWithSubDirectoriesWithJavaSourceCode(JavaProjectObjectModelFactoryImplTest.SrcDirectoryContentType srcDirectoryContentType) throws IOException {
+    void createSrcDirectoryWithSubDirectoriesWithJavaSourceCode(SrcDirectoryContentType srcDirectoryContentType) throws IOException {
         // src
         Files.createDirectories(srcPath);
         Path javaPath = fs.getPath(srcPath.toString(), "java");
@@ -160,7 +160,7 @@ class MavenProjectPathTest {
     @Test
     void isMavenProjectWhereProjectOnlyContainsPomXmlFile() throws IOException {
         // Initialize
-        createMavenProject(JavaProjectObjectModelFactoryImplTest.ProjectType.PROJECT_WITHOUT_SRC_DIRECTORY);
+        createMavenProject(ProjectType.PROJECT_WITHOUT_SRC_DIRECTORY);
         // Test
         boolean result = sut.isMavenProject(projectPath);
         // Verify
@@ -170,7 +170,7 @@ class MavenProjectPathTest {
     @Test
     void isMavenProjectWhereProjectOnlyContainsSrcDirectory() throws IOException {
         // Initialize
-        createMavenProject(JavaProjectObjectModelFactoryImplTest.ProjectType.PROJECT_WITHOUT_POM_XML_FILE);
+        createMavenProject(ProjectType.PROJECT_WITHOUT_POM_XML_FILE);
         // Test
         boolean result = sut.isMavenProject(projectPath);
         // Verify
@@ -180,7 +180,7 @@ class MavenProjectPathTest {
     @Test
     void isMavenProjectWhereProjectDoesNotContainAnyJavaSourceCode() throws IOException {
         // Initialize
-        createMavenProject(JavaProjectObjectModelFactoryImplTest.ProjectType.LEGAL_PROJECT);
+        createMavenProject(ProjectType.LEGAL_PROJECT);
         // Test
         boolean result = sut.isMavenProject(projectPath);
         // Verify
@@ -190,7 +190,7 @@ class MavenProjectPathTest {
     @Test
     void isMavenProjectWhereProjectIsLegal() throws IOException {
         // Initialize
-        createMavenProject(JavaProjectObjectModelFactoryImplTest.ProjectType.LEGAL_PROJECT);
+        createMavenProject(ProjectType.LEGAL_PROJECT);
         MavenProjectPathMock2 sut = new MavenProjectPathMock2();
         // Test
         boolean result = sut.isMavenProject(projectPath);
@@ -198,7 +198,7 @@ class MavenProjectPathTest {
         assertTrue(result);
     }
 
-    void createMavenProject(JavaProjectObjectModelFactoryImplTest.ProjectType projectType) throws IOException {
+    void createMavenProject(ProjectType projectType) throws IOException {
         switch (projectType) {
             case LEGAL_PROJECT:
                 Files.createDirectory(srcPath);
