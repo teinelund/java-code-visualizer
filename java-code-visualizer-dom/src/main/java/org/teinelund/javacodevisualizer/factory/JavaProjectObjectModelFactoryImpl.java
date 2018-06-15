@@ -17,6 +17,7 @@ public class JavaProjectObjectModelFactoryImpl implements JavaProjectObjectModel
         List<MavenProject> mavenProjects = FetchMavenProject.instance().getMavenProjects(mavenProjectPaths);
         JavaProjectObjectModel jpom = DomainObjectModelFactory.instnace().createJavaProjectObjectModel();
         WireClassField.instnace().wireClasses(jpom, mavenProjects);
+        WireClassField.instnace().wireClassFields(jpom);
         return jpom;
     }
 
