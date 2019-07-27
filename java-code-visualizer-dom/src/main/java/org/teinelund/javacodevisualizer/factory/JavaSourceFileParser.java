@@ -2,6 +2,7 @@ package org.teinelund.javacodevisualizer.factory;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.PackageDeclaration;
@@ -55,7 +56,7 @@ public class JavaSourceFileParser {
      * TODO: What to do with inner classes, local classes, annonymous classes and static inner classes.
      *
      * @param reader is a Reader to a java source file.
-     * @param path is the Path object aimong at the java source file.
+     * @param path is the Path object to the java source file.
      * @return a list of JavaTypeDeclarationPath.
      */
     List<JavaTypeDeclarationPath> parseJavaFile(Reader reader, Path path) {
@@ -64,6 +65,11 @@ public class JavaSourceFileParser {
         if (compilationUnit.getPackageDeclaration().isPresent()) {
             PackageDeclaration packageDeclaration = compilationUnit.getPackageDeclaration().get();
             packageName = packageDeclaration.getNameAsString();
+        }
+        NodeList<ImportDeclaration> importDeclarations = compilationUnit.getImports();
+        for (ImportDeclaration importDeclaration : importDeclarations) {
+            String importText = importDeclaration.getName().asString();
+            int x = 0;
         }
         NodeList<TypeDeclaration<?>> types = compilationUnit.getTypes();
         List<JavaTypeDeclarationPath> javaTypeDeclarationPaths = new LinkedList<>();

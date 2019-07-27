@@ -20,13 +20,19 @@ class WireClassField {
 
     private WireClassField() {}
 
-    public static WireClassField instnace() {
+    public static WireClassField instance() {
         if (wireClassField == null) {
             wireClassField = new WireClassField();
         }
         return wireClassField;
     }
 
+    /**
+     * TODO: Redundant? Remove if just one call.
+     *
+     * @param jpom
+     * @param mavenProjects
+     */
     void wireClasses(JavaProjectObjectModel jpom, List<MavenProject> mavenProjects) {
         addJavaTypeDeclarationPaths(jpom, mavenProjects);
     }
@@ -65,12 +71,17 @@ class WireClassField {
 
     void wireClassField(FieldDeclaration fieldDeclaration, JavaTypeDeclarationPath thisClass,
                         JavaProjectObjectModel jpom) {
+        // A field may have several variables declared in one statement. Example String s1 = "Java", s2 = "C++";
         for (VariableDeclarator variable : fieldDeclaration.getVariables()) {
             Type fieldType = variable.getType();
             if (fieldType.isClassOrInterfaceType()) {
                 ClassOrInterfaceType fieldClassType = (ClassOrInterfaceType) fieldType;
+                // The name of the type. Example: String
                 SimpleName variableTypeName = fieldClassType.getName();
+                // It is possible to declare a type with full package name. Example: java.lang.String .
+                // This is not mandatory (unless two types from different packages).
                 Optional<ClassOrInterfaceType> optionalPackageName = fieldClassType.getScope();
+                // Fetch all types with type name 'variableTypeName'.
                 List<JavaTypeDeclarationPath> classesWithSameNameAsFieldDeclaration = jpom.getAllTypesGivenName(
                         variableTypeName.asString());
                 if (optionalPackageName.isPresent()) {
@@ -78,6 +89,11 @@ class WireClassField {
                     wireClassField(packageName, variable, classesWithSameNameAsFieldDeclaration, thisClass, jpom);
                 }
                 else {
+                    // Get all imports from the file, where the class resides.
+                    // Check if some import matches the type name from the field.
+                    // If not, check if some imports have stars. If so, check these packages
+                    // if they contain any type with the type name from the field.
+                    // If not, do below.
                     wireClassField(variable, classesWithSameNameAsFieldDeclaration, thisClass, jpom);
                 }
             }

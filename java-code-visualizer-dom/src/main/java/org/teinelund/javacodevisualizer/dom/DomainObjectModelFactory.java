@@ -9,7 +9,7 @@ public class DomainObjectModelFactory implements IDomainObjectModelFactory {
 
     private DomainObjectModelFactory() {}
 
-    public static IDomainObjectModelFactory instnace() {
+    public static IDomainObjectModelFactory instance() {
         if (IDomainObjectModelFactory == null) {
             IDomainObjectModelFactory = new DomainObjectModelFactory();
         }

@@ -15,9 +15,9 @@ public class JavaProjectObjectModelFactoryImpl implements JavaProjectObjectModel
     public JavaProjectObjectModel createrAndStore(List<Path> javaProjectPaths, List<Path> excludePaths, Path storagePath) throws IOException {
         List<Path> mavenProjectPaths = MavenProjectPath.instance().getMavenProjectPaths(javaProjectPaths, excludePaths);
         List<MavenProject> mavenProjects = FetchMavenProject.instance().getMavenProjects(mavenProjectPaths);
-        JavaProjectObjectModel jpom = DomainObjectModelFactory.instnace().createJavaProjectObjectModel();
-        WireClassField.instnace().wireClasses(jpom, mavenProjects);
-        WireClassField.instnace().wireClassFields(jpom);
+        JavaProjectObjectModel jpom = DomainObjectModelFactory.instance().createJavaProjectObjectModel();
+        WireClassField.instance().wireClasses(jpom, mavenProjects);
+        WireClassField.instance().wireClassFields(jpom);
         return jpom;
     }
 

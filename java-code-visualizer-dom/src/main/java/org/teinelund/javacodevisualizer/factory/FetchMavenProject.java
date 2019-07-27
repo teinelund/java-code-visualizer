@@ -24,6 +24,14 @@ public class FetchMavenProject {
         return fetchMavenProject;
     }
 
+    /**
+     * TODO: Instead of a list of Path, the input could be a list of MavanProject objects, containing
+     * a Path object to the "src"-folder.
+     *
+     * @param mavenProjectPaths
+     * @return
+     * @throws IOException
+     */
     List<MavenProject> getMavenProjects(List<Path> mavenProjectPaths) throws IOException {
         List<MavenProject> mavenProjects = new LinkedList<>();
         for (Path path : mavenProjectPaths) {
@@ -36,7 +44,7 @@ public class FetchMavenProject {
                 }
             }
             List<JavaTypeDeclarationPath> javaTypeDeclarationPaths = findJavaClassPathsInSrcDirectory(srcDirectory);
-            MavenProject mp = DomainObjectModelFactory.instnace().createMavenProject(path, javaTypeDeclarationPaths);
+            MavenProject mp = DomainObjectModelFactory.instance().createMavenProject(path, javaTypeDeclarationPaths);
             mavenProjects.add(mp);
         }
         return mavenProjects;

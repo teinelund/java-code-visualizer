@@ -29,7 +29,7 @@ class WireClassFieldTest {
 
     @BeforeAll
     static void setup() {
-        sut = WireClassField.instnace();
+        sut = WireClassField.instance();
         fs = Jimfs.newFileSystem(Configuration.unix());
         javaSourceFile = fs.getPath("/Users/Cody/Projects/Project/src/org/teinelund/customer.java");
     }
@@ -115,7 +115,7 @@ class WireClassFieldTest {
     }
 
     JavaProjectObjectModel createJavaProjectObjectModel(JavaProjectObjectModelState state) {
-        JavaProjectObjectModel jpom = DomainObjectModelFactory.instnace().createJavaProjectObjectModel();
+        JavaProjectObjectModel jpom = DomainObjectModelFactory.instance().createJavaProjectObjectModel();
         List<JavaTypeDeclarationPath> jtdps = null;
         switch (state) {
             case ONE_CUSTOMER:
